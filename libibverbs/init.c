@@ -57,6 +57,20 @@
 #include "ibverbs.h"
 #include <infiniband/cmd_write.h>
 
+////
+//#include <util/list.h>
+//static struct list_head virtual_device_list;
+
+///
+/*
+struct virtual_device {
+    char name[IBV_SYSFS_NAME_MAX];         // Device name, e.g., "dummy0"
+    struct verbs_device_ops *ops;          // Provider-specific operations
+    struct list_node entry;                // For linking into the list
+};
+
+static struct list_head virtual_devices = LIST_HEAD_INIT(virtual_devices);
+*////
 int abi_ver;
 
 static uint32_t verbs_log_level;
@@ -548,6 +562,22 @@ static void try_all_drivers(struct list_head *sysfs_list,
 	}
 }
 
+/*///
+void ibverbs_register_virtual_device(const char *name, struct verbs_device_ops *ops)
+{
+    struct virtual_device *vdev;
+
+    vdev = malloc(sizeof(*vdev));
+    if (!vdev)
+        return;  // Silently fail on allocation error
+
+    strncpy(vdev->name, name, IBV_SYSFS_NAME_MAX);
+    vdev->name[IBV_SYSFS_NAME_MAX - 1] = '\0';  // Ensure null termination
+    vdev->ops = ops;
+    list_add_tail(&virtual_devices, &vdev->entry);
+}
+*////
+
 int ibverbs_get_device_list(struct list_head *device_list)
 {
 	LIST_HEAD(sysfs_list);
@@ -619,6 +649,7 @@ out:
 
 	return num_devices;
 }
+
 
 static void verbs_set_log_level(void)
 {

@@ -468,9 +468,8 @@ typedef struct verbs_device *(*verbs_driver_init_func)(const char *uverbs_sys_pa
 void verbs_register_driver(const struct verbs_device_ops *ops);
 
 /////
-//void ibverbs_register_virtual_device(const char *name, struct verbs_device_ops *ops);
-/////
 
+/////
 /*
  * Macro for providers to use to supply verbs_device_ops to the core code.
  * This creates a global symbol for the provider structure to be used by the

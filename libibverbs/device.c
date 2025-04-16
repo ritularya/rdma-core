@@ -48,6 +48,9 @@
 #include <util/util.h>
 #include "ibverbs.h"
 
+//extra added for device discovery
+//extern struct ibv_device *get_dummy_device(void);
+
 static pthread_mutex_t dev_list_lock = PTHREAD_MUTEX_INITIALIZER;
 static struct list_head device_list = LIST_HEAD_INIT(device_list);
 
@@ -77,19 +80,32 @@ LATEST_SYMVER_FUNC(ibv_get_device_list, 1_1, "IBVERBS_1.1",
 		goto out;
 	}
 
+//for discovery of dummy device
 	l = calloc(num_devices + 1, sizeof (struct ibv_device *));
+//	l = calloc(num_devices + 2, sizeof (struct ibv_device *));
 	if (!l) {
 		errno = ENOMEM;
 		goto out;
 	}
 
+	//Populating the list with actual devices
 	list_for_each(&device_list, device, entry) {
 		l[i] = &device->device;
 		ibverbs_device_hold(l[i]);
 		i++;
 	}
+
+	// Add the dummy device
+//	l[num_devices] = get_dummy_device();
+
+	// NULL terminator
+//	l[num_devices + 1] = NULL;
+
+	// Set the count (including dummy device)
+
 	if (num)
 		*num = num_devices;
+//		*num = num_devices + 1;
 out:
 	pthread_mutex_unlock(&dev_list_lock);
 	return l;
