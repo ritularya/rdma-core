@@ -58,19 +58,8 @@
 #include <infiniband/cmd_write.h>
 
 ////
-//#include <util/list.h>
-//static struct list_head virtual_device_list;
-
-///
-/*
-struct virtual_device {
-    char name[IBV_SYSFS_NAME_MAX];         // Device name, e.g., "dummy0"
-    struct verbs_device_ops *ops;          // Provider-specific operations
-    struct list_node entry;                // For linking into the list
-};
-
-static struct list_head virtual_devices = LIST_HEAD_INIT(virtual_devices);
-*////
+#include <ccan/list.h>
+////
 int abi_ver;
 
 static uint32_t verbs_log_level;
@@ -97,6 +86,10 @@ struct ibv_driver {
 };
 
 static LIST_HEAD(driver_list);
+
+//modifications
+static LIST_HEAD(virtual_device_list);
+////
 
 int try_access_device(const struct verbs_sysfs_dev *sysfs_dev)
 {
@@ -267,6 +260,21 @@ void verbs_register_driver(const struct verbs_device_ops *ops)
 
 	list_add_tail(&driver_list, &driver->entry);
 }
+
+//modification
+void verbs_register_virtual_device(struct verbs_device *device)
+{
+    struct verbs_device *vdev;
+    list_for_each_entry(vdev, &virtual_device_list, entry) {
+        if (strcmp(vdev->device.name, device->device.name) == 0) {
+            fprintf(stderr, "Virtual device '%s' already exists\n", device->device.name);
+            return;
+        }
+    }
+    list_add_tail(&device->entry, &virtual_device_list);
+}
+///
+
 
 /* Match a single modalias value */
 static bool match_modalias(const struct verbs_match_ent *ent, const char *value)
@@ -625,6 +633,14 @@ int ibverbs_get_device_list(struct list_head *device_list)
 	}
 
 	try_all_drivers(&sysfs_list, device_list, &num_devices);
+
+	///modifications
+//	struct verbs_device *vdev;
+	list_for_each_entry(vdev, &virtual_device_list, entry) {
+		list_add_tail(&vdev->entry, device_list);
+		(*num_devices)++;
+	}
+	///
 
 	if (list_empty(&sysfs_list) || drivers_loaded)
 		goto out;

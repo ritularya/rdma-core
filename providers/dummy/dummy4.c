@@ -48,5 +48,6 @@ __attribute__((constructor))
 static void dummy_init(void) {
     printf("Registering dummy driver\n");
     verbs_register_driver(&dummy_ops);
+    verb_register_virtual_device("dummy",dummy_ops.name) 
     printf("Registered dummy driver\n");
 }

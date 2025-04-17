@@ -469,7 +469,9 @@ void verbs_register_driver(const struct verbs_device_ops *ops);
 
 /////
 //void ibverbs_register_virtual_device(const char *name, struct verbs_device_ops *ops);
+void verbs_register_virtual_device(struct verbs_device *device);
 /////
+
 
 /*
  * Macro for providers to use to supply verbs_device_ops to the core code.
